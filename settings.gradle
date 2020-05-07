@@ -1,0 +1,4 @@
+rootProject.name='ObservableDB'
+include ':app'
+include ':room'
+include ':domain'

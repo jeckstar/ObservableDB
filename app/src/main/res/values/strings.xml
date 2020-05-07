@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">ObservableDB</string>
+    <string name="add_new_item_to_db">Add new item to DB</string>
+    <string name="db_items">DB items:</string>
+    <string name="remove_item_from_db">Delete first search result item from DB</string>
+    <string name="enter_item_id">Enter item id</string>
+    <string name="search_results">Search results:</string>
+</resources>
