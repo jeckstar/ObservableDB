@@ -3,6 +3,7 @@ package tech.newline.android.room.item
 import androidx.room.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Maybe
 import io.reactivex.Single
 
 @Dao
@@ -14,7 +15,7 @@ interface IRoomItemDao {
     fun getAll(): Flowable<List<RoomItemEntity>>
 
     @Query("SELECT * FROM my_items WHERE id == :id")
-    fun getById(id: Int): Single<RoomItemEntity>
+    fun getById(id: Int): Maybe<RoomItemEntity>
 
     @Update
     fun update(dto: RoomItemEntity): Completable

@@ -72,7 +72,10 @@ class HomeScreenPresenter(
         if (firstSearchResultId != EMPTY_ID) {
             getItemUseCase
                 .getById(firstSearchResultId)
-                .flatMapCompletable {  it -> deleteItemUseCase.delete(it)}
+                .toSingle()
+                .flatMapCompletable {  it ->
+                    deleteItemUseCase.delete(it)
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(

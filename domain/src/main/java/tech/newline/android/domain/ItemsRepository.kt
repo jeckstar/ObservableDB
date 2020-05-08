@@ -2,11 +2,11 @@ package tech.newline.android.domain
 
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.Single
+import io.reactivex.Maybe
 
 interface ItemsRepository {
 
-    fun getById(id: Int): Single<ItemDto>
+    fun getById(id: Int): Maybe<ItemDto>
 
     fun observeAll(): Flowable<List<ItemDto>>
 

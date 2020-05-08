@@ -60,6 +60,6 @@ class HomeScreenView(
     }
 
     override fun showErrorMessage() {
-        Toast.makeText(activity, "Success", Toast.LENGTH_SHORT).show()
+        Toast.makeText(activity, "Error", Toast.LENGTH_SHORT).show()
     }
 }
