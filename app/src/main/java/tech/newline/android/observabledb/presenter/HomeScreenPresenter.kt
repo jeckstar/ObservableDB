@@ -1,6 +1,5 @@
 package tech.newline.android.observabledb.presenter
 
-import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -37,13 +36,10 @@ class HomeScreenPresenter(
     }
 
     override fun addNewItemToDb() {
-        Completable
-            .fromAction {
-                val id = Random.nextInt(0, Int.MAX_VALUE)
-                addItemUseCase.add(
-                    ItemDto(id, id.toString())
-                )
-            }
+        val id = Random.nextInt(0, Int.MAX_VALUE)
+        addItemUseCase.add(
+            ItemDto(id, id.toString())
+        )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -73,13 +69,10 @@ class HomeScreenPresenter(
     }
 
     override fun deleteFirstFromSearchResult() {
-        if (firstSearchResultId != EMPTY_ID)
-            Completable
-                .fromAction {
-                    getItemUseCase
-                        .getById(firstSearchResultId)
-                        .subscribe(deleteItemUseCase::delete)
-                }
+        if (firstSearchResultId != EMPTY_ID) {
+            getItemUseCase
+                .getById(firstSearchResultId)
+                .flatMapCompletable {  it -> deleteItemUseCase.delete(it)}
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -87,6 +80,7 @@ class HomeScreenPresenter(
                     { view.showErrorMessage() }
                 )
                 .run(compositeDisposable::add)
+        }
     }
 
     override fun onDisposableCleared() {

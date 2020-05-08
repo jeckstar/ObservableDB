@@ -1,13 +1,14 @@
 package tech.newline.android.room.item
 
 import androidx.room.*
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 
 @Dao
 interface IRoomItemDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun add(entity: RoomItemEntity)
+    fun add(entity: RoomItemEntity): Completable
 
     @Query("SELECT * FROM my_items")
     fun getAll(): Flowable<List<RoomItemEntity>>
@@ -16,9 +17,9 @@ interface IRoomItemDao {
     fun getById(id: Int): Single<RoomItemEntity>
 
     @Update
-    fun update(dto: RoomItemEntity)
+    fun update(dto: RoomItemEntity): Completable
 
     @Delete
-    fun delete(dto: RoomItemEntity)
+    fun delete(dto: RoomItemEntity): Completable
 
 }

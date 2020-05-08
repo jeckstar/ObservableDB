@@ -1,5 +1,6 @@
 package tech.newline.android.domain
 
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 
@@ -9,9 +10,9 @@ interface ItemsRepository {
 
     fun observeAll(): Flowable<List<ItemDto>>
 
-    fun add(dto: ItemDto)
+    fun add(dto: ItemDto): Completable
 
-    fun update(dto: ItemDto)
+    fun update(dto: ItemDto): Completable
 
-    fun delete(dto: ItemDto)
+    fun delete(dto: ItemDto): Completable
 }
