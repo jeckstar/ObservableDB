@@ -2,6 +2,8 @@ package tech.newline.android.persistence
 
 import android.content.Context
 import tech.newline.android.domain.ItemsRepository
+import tech.newline.android.room.RoomItemsDatabase
+import tech.newline.android.room.item.RoomsItemRepository
 
 object ItemRepositoryProvider {
 
@@ -9,7 +11,9 @@ object ItemRepositoryProvider {
 
     fun getInstance(context: Context): ItemsRepository {
         return if (instance == null) {
-            instance = InMemoryItemRepository()
+            instance = RoomsItemRepository(
+                RoomItemsDatabase.createDbBuilder(context).build().getRoomItemDao()
+            )
             instance!!
         } else {
             instance!!

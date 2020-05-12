@@ -5,11 +5,12 @@ import io.reactivex.BackpressureStrategy.LATEST
 import io.reactivex.subjects.PublishSubject
 import tech.newline.android.domain.ItemDto
 import tech.newline.android.domain.ItemsRepository
+import java.util.concurrent.ConcurrentHashMap
 
 
 class InMemoryItemRepository : ItemsRepository {
 
-    private val store = HashMap<Int, ItemDto>() //ObservableMap
+    private val store = ConcurrentHashMap<Int, ItemDto>() //ObservableMap
     var source = PublishSubject.create<List<ItemDto>>()
 
     override fun getById(id: Int) =
@@ -37,7 +38,7 @@ class InMemoryItemRepository : ItemsRepository {
 
     override fun delete(dto: ItemDto): Completable {
         return Observable
-            .just(store.remove(dto.id))
+            .fromCallable { store.remove(dto.id) }
             .flatMapCompletable { CompletableSource { source.onNext(store.values.toList()) } }
     }
 

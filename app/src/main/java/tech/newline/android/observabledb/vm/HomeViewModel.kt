@@ -1,20 +1,32 @@
-package tech.newline.android.observabledb.presenter
+package tech.newline.android.observabledb.vm
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import tech.newline.android.domain.*
-import tech.newline.android.observabledb.view.IHomeScreenView
+import tech.newline.android.observabledb.vm.Results.ERROR
+import tech.newline.android.observabledb.vm.Results.SUCCESS
 import kotlin.random.Random
 
-class HomeScreenPresenter(
-    private val view: IHomeScreenView,
+class HomeViewModel(
     private val addItemUseCase: IAddItemUseCase,
-    private val observeAllItemsFacade: ObserveAllItemsFacade,
+    private val observeAllItemsFacade: IObserveAllItemsFacade,
     private val getItemUseCase: IGetItemUseCase,
     private val deleteItemUseCase: IDeleteItemUseCase
-) : IHomeScreenPresenter {
+) : ViewModel(), IHomeViewModel {
+
+    private val _itemsDMContent = MutableLiveData<List<String>>()
+    override val itemsDMContent: LiveData<List<String>> get() = _itemsDMContent
+
+    private val _searchResults = MutableLiveData<List<String>>()
+    override val searchResults: LiveData<List<String>> get() = _searchResults
+
+    private val _resultState = MutableLiveData<Results>()
+    override val resultState: LiveData<Results> get() = _resultState
 
     private val compositeDisposable = CompositeDisposable()
     private val itemsContent = mutableListOf<ItemDto>()
@@ -24,14 +36,12 @@ class HomeScreenPresenter(
         observeAllItemsFacade
             .observeItems()
             .doOnNext { it ->
-                itemsContent.clear()
-                itemsContent.addAll(it)
-                view.showSearchResults(emptyList())
+                _searchResults.postValue(emptyList())
             }
-            .flatMapSingle { it -> Observable.fromIterable(it).map { it.content }.toList() }
+            .map { items ->  items.map { it.content } }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(view::updateDBInfo)
+            .subscribe(_itemsDMContent::postValue)
             .run(compositeDisposable::add)
     }
 
@@ -43,15 +53,15 @@ class HomeScreenPresenter(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { view.showSuccessMessage() },
-                { view.showErrorMessage() }
+                { _resultState.value = SUCCESS },
+                {  _resultState.value = ERROR  }
             )
             .run(compositeDisposable::add)
     }
 
     override fun onSearchItem(content: String) {
         if (content.isEmpty()) {
-            view.showSearchResults(emptyList())
+            _searchResults.postValue(emptyList())
             firstSearchResultId = EMPTY_ID
         } else {
             Observable
@@ -63,7 +73,7 @@ class HomeScreenPresenter(
                     if (it.isNotEmpty()) firstSearchResultId = it.first().id
                     return@flatMap Observable.fromIterable(it).map { it.content }.toList()
                 }
-                .subscribe(view::showSearchResults)
+                .subscribe(_searchResults::postValue)
                 .run(compositeDisposable::add)
         }
     }
@@ -73,20 +83,20 @@ class HomeScreenPresenter(
             getItemUseCase
                 .getById(firstSearchResultId)
                 .toSingle()
-                .flatMapCompletable {  it ->
+                .flatMapCompletable { it ->
                     deleteItemUseCase.delete(it)
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                    { view.showSuccessMessage() },
-                    { view.showErrorMessage() }
+                    { _resultState.postValue(SUCCESS) },
+                    { _resultState.postValue(ERROR) }
                 )
                 .run(compositeDisposable::add)
-        }
+        } else _resultState.postValue(ERROR)
     }
 
-    override fun onDisposableCleared() {
+    override fun onCleared() {
         this.compositeDisposable.clear()
     }
 
